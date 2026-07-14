@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="color-scheme" content="dark">
+<title>Treinos — A Forja</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@500;700;900&family=Open+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#050505;
+    --card:#0D0D0D;
+    --card-2:#131313;
+    --line:#242424;
+    --gold:#E39E63;
+    --ember:#D63B2F;
+    --white:#FFFFFF;
+    --grey:#8a8a8a;
+    --cold:#3a4a5a;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%; background:var(--bg);}
+  body{
+    font-family:'Open Sans', Arial, sans-serif;
+    color:var(--white);
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:40px;
+  }
+  .wrap{ max-width:480px; margin:0 auto; padding:22px 20px 10px; }
+
+  /* HEADER */
+  .topbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;}
+  .brand{ font-family:'League Spartan',sans-serif; font-weight:900; letter-spacing:1px; font-size:15px; text-transform:uppercase;}
+  .brand span{ color:var(--gold); }
+  .fase-tag{ font-family:'Open Sans',sans-serif; font-style:italic; color:var(--grey); font-size:11px; }
+
+  /* SELECTORS */
+  .row-select{ display:flex; gap:8px; margin-bottom:12px; }
+  .chip{
+    flex:1; text-align:center; padding:10px 4px; border-radius:8px;
+    background:var(--card); border:1px solid var(--line); color:var(--grey);
+    font-family:'League Spartan',sans-serif; font-weight:700; letter-spacing:0.5px;
+    font-size:14px; cursor:pointer; transition:all .2s ease; user-select:none;
+  }
+  .chip small{ display:block; font-family:'Open Sans',sans-serif; font-weight:400; font-style:italic; font-size:9px; margin-top:2px; text-transform:none; letter-spacing:0;}
+  .chip.active{ background:linear-gradient(180deg,var(--gold),#b9773f); border-color:var(--gold); color:#1a0f05; }
+
+  .toggle-local{ display:flex; background:var(--card); border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-bottom:18px;}
+  .toggle-local button{
+    flex:1; padding:10px; background:transparent; border:none; color:var(--grey);
+    font-family:'League Spartan',sans-serif; font-weight:700; font-size:13px; letter-spacing:0.5px;
+    cursor:pointer; text-transform:uppercase;
+  }
+  .toggle-local button.active{ background:var(--gold); color:#1a0f05; }
+
+  .week-meta{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:11px; color:var(--grey); margin:-4px 0 18px; padding:0 2px;
+    font-family:'Open Sans',sans-serif; font-style:italic;
+  }
+  .week-meta b{ color:var(--gold); font-style:normal; }
+
+  /* FIGURE STAGE */
+  .stage{
+    background:radial-gradient(ellipse at center, #14100c 0%, var(--bg) 75%);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:26px 20px 20px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+    margin-bottom:16px;
+  }
+  .phase-label{
+    font-family:'League Spartan',sans-serif; font-weight:900; letter-spacing:3px;
+    font-size:12px; text-transform:uppercase; color:var(--cold); transition:color .4s ease;
+  }
+  .phase-label.working{ color:var(--ember); }
+  .phase-label.resting{ color:#5b8ba6; }
+
+  .timer-ring-wrap{ position:relative; width:200px; height:200px; margin:14px auto 10px; }
+  svg.ring{ transform:rotate(-90deg); width:100%; height:100%; }
+  .ring-bg{ fill:none; stroke:var(--line); stroke-width:6; }
+  .ring-fg{ fill:none; stroke:var(--cold); stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset 1s linear, stroke .4s ease; }
+  .ring-fg.working{ stroke:var(--ember); }
+  .ring-fg.resting{ stroke:#5b8ba6; }
+
+  .figure-slot{ position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
+  .time-num{
+    position:absolute; bottom:8px; left:0; right:0; text-align:center;
+    font-family:'League Spartan',sans-serif; font-weight:900; font-size:15px; color:var(--white);
+    opacity:0.85;
+  }
+
+  .ex-name{ font-family:'League Spartan',sans-serif; font-weight:900; text-transform:uppercase; font-size:22px; letter-spacing:0.5px; margin-top:6px;}
+  .ex-detail{ font-family:'Open Sans',sans-serif; font-style:italic; color:var(--grey); font-size:13px; margin-top:6px; min-height:34px; line-height:1.4; }
+
+  .round-dots{ display:flex; justify-content:center; gap:6px; margin-top:14px; }
+  .round-dots .dot{ width:7px; height:7px; border-radius:50%; background:var(--line); }
+  .round-dots .dot.done{ background:var(--gold); }
+  .round-dots .dot.current{ background:var(--ember); box-shadow:0 0 6px var(--ember); }
+
+  .ex-progress{ display:flex; gap:5px; margin-top:10px; justify-content:center; }
+  .ex-progress span{ width:26px; height:3px; border-radius:3px; background:var(--line); }
+  .ex-progress span.done{ background:var(--gold); }
+  .ex-progress span.current{ background:var(--white); }
+
+  /* CONTROLS */
+  .controls{ display:flex; gap:10px; margin-top:18px; }
+  .btn{
+    flex:1; padding:15px; border-radius:10px; border:none; cursor:pointer;
+    font-family:'League Spartan',sans-serif; font-weight:700; font-size:14px; text-transform:uppercase; letter-spacing:1px;
+  }
+  .btn-primary{ background:linear-gradient(180deg,var(--gold),#b9773f); color:#1a0f05; }
+  .btn-ghost{ background:var(--card); border:1px solid var(--line); color:var(--white); flex:0 0 54px; font-size:18px; }
+  .btn-danger{ background:transparent; border:1px solid var(--line); color:var(--grey); flex:0 0 54px; font-size:16px;}
+
+  .exlist{ margin-top:26px; }
+  .exlist-title{ font-family:'League Spartan',sans-serif; font-weight:700; letter-spacing:1px; font-size:12px; text-transform:uppercase; color:var(--grey); margin-bottom:10px; }
+  .exlist-item{
+    display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:8px;
+    background:var(--card); border:1px solid var(--line); margin-bottom:8px; opacity:0.55; transition:all .3s ease;
+  }
+  .exlist-item.active{ opacity:1; border-color:var(--gold); background:var(--card-2); }
+  .exlist-num{ font-family:'League Spartan',sans-serif; font-weight:900; color:var(--gold); font-size:13px; width:18px; }
+  .exlist-name{ font-family:'Open Sans',sans-serif; font-size:13px; }
+
+  .done-screen{ text-align:center; padding:40px 10px 10px; display:none; }
+  .done-screen.show{ display:block; }
+  .done-screen .titulo{ font-family:'League Spartan',sans-serif; font-weight:900; font-size:26px; text-transform:uppercase; color:var(--gold); }
+  .done-screen p{ font-family:'Open Sans',sans-serif; color:var(--grey); font-size:13px; margin-top:10px; line-height:1.6; }
+
+  .footer-note{ text-align:center; margin-top:26px; font-family:'League Spartan',sans-serif; font-size:10px; letter-spacing:2px; color:#3a3a3a; text-transform:uppercase; }
+
+  /* ============ REALISTIC EXERCISE ILLUSTRATION ============ */
+  .fig{
+    position:relative; width:150px; height:170px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .fig video{
+    max-width:100%; max-height:100%; object-fit:contain;
+    filter: brightness(0.72) saturate(0.5) drop-shadow(0 0 0 rgba(0,0,0,0));
+    transform: scale(1);
+    transition: filter .5s ease, transform .5s ease;
+  }
+  .fig.idle video{
+    filter: brightness(0.6) saturate(0.35);
+  }
+  .fig.working video{
+    filter: brightness(1.05) saturate(1.25) drop-shadow(0 0 18px rgba(214,59,47,0.55)) drop-shadow(0 0 34px rgba(227,158,99,0.35));
+    animation: figPulse 1.1s ease-in-out infinite;
+  }
+  .fig.resting video{
+    filter: brightness(0.55) saturate(0.25) hue-rotate(70deg) drop-shadow(0 0 10px rgba(91,139,166,0.25));
+    transform: scale(0.97);
+  }
+  @keyframes figPulse{
+    0%,100%{ transform:scale(1); }
+    50%{ transform:scale(1.045); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .fig video{ animation:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">A <span>FORJA</span></div>
+    <div class="fase-tag">Fase 1 · Moldar</div>
+  </div>
+
+  <div class="row-select" id="treinoSelect">
+    <div class="chip active" data-treino="A">A<small>Agach.+Emp.</small></div>
+    <div class="chip" data-treino="B">B<small>Puxar+Post.</small></div>
+    <div class="chip" data-treino="C">C<small>Misto+Core</small></div>
+    <div class="chip" data-treino="D">D<small>Condic.</small></div>
+  </div>
+
+  <div class="row-select" id="semanaSelect">
+    <div class="chip active" data-semana="1">S1</div>
+    <div class="chip" data-semana="2">S2</div>
+    <div class="chip" data-semana="3">S3</div>
+    <div class="chip" data-semana="4">S4</div>
+  </div>
+
+  <div class="toggle-local" id="localToggle">
+    <button class="active" data-local="casa">🏠 Em Casa</button>
+    <button data-local="academia">🏋️ Academia</button>
+  </div>
+
+  <div class="week-meta" id="weekMeta"></div>
+
+  <div class="stage">
+    <div class="phase-label" id="phaseLabel">PRONTO</div>
+
+    <div class="timer-ring-wrap">
+      <svg class="ring" viewBox="0 0 200 200">
+        <circle class="ring-bg" cx="100" cy="100" r="88"></circle>
+        <circle class="ring-fg" id="ringFg" cx="100" cy="100" r="88"></circle>
+      </svg>
+      <div class="figure-slot">
+        <div class="fig idle" id="fig" data-pose="squat">
+          <video id="figImg" autoplay loop muted playsinline></video>
+        </div>
+      </div>
+      <div class="time-num" id="timeNum">40</div>
+    </div>
+
+    <div class="ex-name" id="exName">Agachamento</div>
+    <div class="ex-detail" id="exDetail">Agachamento livre</div>
+
+    <div class="round-dots" id="roundDots"></div>
+    <div class="ex-progress" id="exProgress"></div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-danger" id="resetBtn" title="Reiniciar">⟲</button>
+    <button class="btn btn-primary" id="startBtn">Começar Treino</button>
+    <button class="btn btn-ghost" id="skipBtn" title="Pular">⏭</button>
+  </div>
+
+  <div class="exlist" id="exlist">
+    <div class="exlist-title">Sequência do treino</div>
+    <div id="exlistItems"></div>
+  </div>
+
+  <div class="done-screen" id="doneScreen">
+    <div class="titulo">Treino Concluído</div>
+    <p>Mais uma sessão registrada. O aço não se forja de uma vez — é golpe depois de golpe.<br>Escolha o próximo treino quando estiver pronto.</p>
+  </div>
+
+  <div class="footer-note">@AFORJA100</div>
+</div>
+
+<script>
+const TREINOS = {
+  A: { foco:"Agachamento + Empurrar", exercicios:[
+    {nome:"Agachamento", casa:"Agachamento livre", academia:"Agachamento no smith ou goblet com halter", pose:"squat"},
+    {nome:"Flexão de Braço", casa:"Flexão tradicional (joelho apoiado se precisar)", academia:"Supino máquina ou halteres", pose:"push"},
+    {nome:"Avanço (Passada)", casa:"Passada alternada no lugar", academia:"Passada com halteres", pose:"lunge"},
+    {nome:"Prancha Abdominal", casa:"Prancha no antebraço", academia:"Prancha com peso nas costas", pose:"plank"}
+  ]},
+  B: { foco:"Puxar + Posterior", exercicios:[
+    {nome:"Ponte de Glúteo", casa:"Elevação pélvica unilateral", academia:"Stiff com halteres", pose:"hinge"},
+    {nome:"Remada", casa:"Remada com toalha na porta ou mochila", academia:"Remada baixa no cabo", pose:"row"},
+    {nome:"Extensão Lombar", casa:"Superman (extensão no chão)", academia:"Hiperextensão no banco romano", pose:"hinge"},
+    {nome:"Prancha Lateral", casa:"Prancha lateral simples", academia:"Prancha lateral com peso", pose:"plank-side"}
+  ]},
+  C: { foco:"Misto + Core", exercicios:[
+    {nome:"Agachamento com Salto", casa:"Sem impacto: sem salto", academia:"Leg press em ritmo acelerado", pose:"squat-jump"},
+    {nome:"Flexão Fechada", casa:"Flexão com mãos próximas", academia:"Supino inclinado", pose:"push"},
+    {nome:"Mountain Climber", casa:"Mountain climber", academia:"Abdominal na máquina", pose:"climber"},
+    {nome:"Prancha com Toque", casa:"Prancha tocando ombro alternado", academia:"Prancha com peso", pose:"plank"}
+  ]},
+  D: { foco:"Condicionamento Puro", exercicios:[
+    {nome:"Polichinelo", casa:"Polichinelo", academia:"Polichinelo ou esteira ritmo alto", pose:"jack"},
+    {nome:"Corrida no Lugar", casa:"Corrida no lugar, joelho alto", academia:"Esteira inclinada", pose:"run"},
+    {nome:"Burpee sem Salto", casa:"Burpee adaptado (sem impacto)", academia:"Burpee completo", pose:"burpee"},
+    {nome:"Agachamento com Salto", casa:"Agachamento com salto", academia:"Step no banco", pose:"squat-jump"}
+  ]}
+};
+
+const SEMANAS = {
+  1:{rounds:3, work:40, rest:20, label:"Adaptação"},
+  2:{rounds:4, work:40, rest:20, label:"Consistência"},
+  3:{rounds:4, work:45, rest:15, label:"Exigência"},
+  4:{rounds:5, work:45, rest:15, label:"Consolidação"}
+};
+
+const POSES = {
+  "squat": "poses/squat.mp4",
+  "squat-jump": "poses/squat-jump.mp4",
+  "push": "poses/push.mp4",
+  "lunge": "poses/lunge.mp4",
+  "plank": "poses/plank.mp4",
+  "plank-side": "poses/plank-side.mp4",
+  "hinge": "poses/hinge.mp4",
+  "row": "poses/row.mp4",
+  "climber": "poses/climber.mp4",
+  "jack": "poses/jack.mp4",
+  "run": "poses/run.mp4",
+  "burpee": "poses/burpee.mp4"
+};
+
+let state = {
+  treino: 'A',
+  semana: 1,
+  local: 'casa',
+  running: false,
+  phase: 'idle', // idle | work | rest | done
+  round: 1,
+  exIndex: 0,
+  timeLeft: 0,
+  tickHandle: null
+};
+
+const el = id => document.getElementById(id);
+const ringFg = el('ringFg');
+const RING_CIRC = 2 * Math.PI * 88;
+ringFg.style.strokeDasharray = RING_CIRC;
+
+let audioCtx;
+function beep(freq, dur){
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.frequency.value = freq;
+    o.type = 'sine';
+    g.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + dur);
+  }catch(e){}
+}
+
+function currentWeek(){ return SEMANAS[state.semana]; }
+function currentExercicios(){ return TREINOS[state.treino].exercicios; }
+
+function renderStaticUI(){
+  document.querySelectorAll('#treinoSelect .chip').forEach(c=>{
+    c.classList.toggle('active', c.dataset.treino === state.treino);
+  });
+  document.querySelectorAll('#semanaSelect .chip').forEach(c=>{
+    c.classList.toggle('active', String(c.dataset.semana) === String(state.semana));
+  });
+  document.querySelectorAll('#localToggle button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.local === state.local);
+  });
+
+  const wk = currentWeek();
+  el('weekMeta').innerHTML = `<span>${wk.rounds} rodadas · ${wk.work}s trabalho / ${wk.rest}s descanso</span><b>${wk.label}</b>`;
+
+  renderExList();
+  renderRoundDots();
+  resetToIdleDisplay();
+}
+
+function renderExList(){
+  const items = currentExercicios();
+  el('exlistItems').innerHTML = items.map((ex,i)=>`
+    <div class="exlist-item" data-i="${i}">
+      <div class="exlist-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="exlist-name">${ex.nome} <span style="color:var(--grey)">— ${state.local==='casa'?ex.casa:ex.academia}</span></div>
+    </div>
+  `).join('');
+}
+
+function renderRoundDots(){
+  const wk = currentWeek();
+  let dots = '';
+  for(let i=1;i<=wk.rounds;i++){
+    dots += `<div class="dot" data-r="${i}"></div>`;
+  }
+  el('roundDots').innerHTML = dots;
+
+  let prog = '';
+  currentExercicios().forEach((_,i)=>{ prog += `<span data-ei="${i}"></span>`; });
+  el('exProgress').innerHTML = prog;
+}
+
+function resetToIdleDisplay(){
+  state.phase='idle'; state.round=1; state.exIndex=0;
+  const ex = currentExercicios()[0];
+  el('exName').textContent = ex.nome;
+  el('exDetail').textContent = state.local==='casa'? ex.casa : ex.academia;
+  el('fig').className = 'fig idle';
+  el('fig').dataset.pose = ex.pose;
+  el('figImg').src = POSES[ex.pose];
+  el('figImg').play().catch(()=>{});
+  el('phaseLabel').textContent = 'PRONTO';
+  el('phaseLabel').className = 'phase-label';
+  el('timeNum').textContent = currentWeek().work;
+  ringFg.className = 'ring-fg';
+  ringFg.style.strokeDashoffset = 0;
+  el('startBtn').textContent = 'Começar Treino';
+  el('doneScreen').classList.remove('show');
+  updateHighlights();
+}
+
+function updateHighlights(){
+  document.querySelectorAll('.exlist-item').forEach(item=>{
+    item.classList.toggle('active', Number(item.dataset.i) === state.exIndex);
+  });
+  document.querySelectorAll('#roundDots .dot').forEach(d=>{
+    const r = Number(d.dataset.r);
+    d.classList.toggle('done', r < state.round);
+    d.classList.toggle('current', r === state.round);
+  });
+  document.querySelectorAll('#exProgress span').forEach(s=>{
+    const i = Number(s.dataset.ei);
+    s.classList.toggle('done', i < state.exIndex);
+    s.classList.toggle('current', i === state.exIndex);
+  });
+}
+
+function setExerciseDisplay(){
+  const ex = currentExercicios()[state.exIndex];
+  el('exName').textContent = ex.nome;
+  el('exDetail').textContent = state.local==='casa'? ex.casa : ex.academia;
+  el('fig').dataset.pose = ex.pose;
+  el('figImg').src = POSES[ex.pose];
+  el('figImg').play().catch(()=>{});
+}
+
+function startWorkout(){
+  if(state.running) return;
+  state.running = true;
+  state.phase = 'work';
+  state.round = 1;
+  state.exIndex = 0;
+  state.timeLeft = currentWeek().work;
+  el('startBtn').textContent = 'Em andamento…';
+  setExerciseDisplay();
+  updateHighlights();
+  tick(true);
+  state.tickHandle = setInterval(()=>tick(false), 1000);
+}
+
+function tick(first){
+  if(!first){
+    state.timeLeft -= 1;
+    if(state.timeLeft <= 3 && state.timeLeft > 0) beep(880, .08);
+  }
+  if(state.timeLeft <= 0){
+    advancePhase();
+    return;
+  }
+  renderTimer();
+}
+
+function renderTimer(){
+  el('timeNum').textContent = state.timeLeft;
+  const wk = currentWeek();
+  const total = state.phase === 'work' ? wk.work : wk.rest;
+  const frac = state.timeLeft / total;
+  ringFg.style.strokeDashoffset = RING_CIRC * (1 - frac);
+
+  const fig = el('fig');
+  const label = el('phaseLabel');
+  ringFg.classList.remove('working','resting');
+  fig.classList.remove('working','resting','idle');
+  label.classList.remove('working','resting');
+
+  if(state.phase === 'work'){
+    ringFg.classList.add('working'); fig.classList.add('working'); label.classList.add('working');
+    label.textContent = 'FORJANDO';
+  } else if(state.phase === 'rest'){
+    ringFg.classList.add('resting'); fig.classList.add('resting'); label.classList.add('resting');
+    label.textContent = 'DESCANSO';
+  }
+}
+
+function advancePhase(){
+  const wk = currentWeek();
+  const exs = currentExercicios();
+
+  if(state.phase === 'work'){
+    beep(440,.15);
+    if(state.exIndex < exs.length - 1){
+      state.exIndex += 1;
+      state.phase = 'work';
+      state.timeLeft = wk.work;
+      setExerciseDisplay();
+    } else {
+      // round finished -> rest before next round, or finish
+      if(state.round < wk.rounds){
+        state.phase = 'rest';
+        state.timeLeft = wk.rest;
+      } else {
+        finishWorkout();
+        return;
+      }
+    }
+  } else if(state.phase === 'rest'){
+    beep(660,.15);
+    state.round += 1;
+    state.exIndex = 0;
+    state.phase = 'work';
+    state.timeLeft = wk.work;
+    setExerciseDisplay();
+  }
+  updateHighlights();
+  renderTimer();
+}
+
+function finishWorkout(){
+  clearInterval(state.tickHandle);
+  state.running = false;
+  state.phase = 'done';
+  beep(520,.12);
+  setTimeout(()=>beep(660,.12), 160);
+  setTimeout(()=>beep(880,.2), 320);
+  el('phaseLabel').textContent = 'CONCLUÍDO';
+  el('phaseLabel').className = 'phase-label';
+  el('fig').className = 'fig idle';
+  el('doneScreen').classList.add('show');
+  el('startBtn').textContent = 'Começar Treino';
+}
+
+function resetWorkout(){
+  clearInterval(state.tickHandle);
+  state.running = false;
+  resetToIdleDisplay();
+}
+
+function skipCurrent(){
+  if(!state.running) return;
+  state.timeLeft = 1;
+}
+
+// ==== EVENT WIRING ====
+el('treinoSelect').addEventListener('click', e=>{
+  const chip = e.target.closest('.chip'); if(!chip) return;
+  state.treino = chip.dataset.treino;
+  resetWorkout();
+});
+el('semanaSelect').addEventListener('click', e=>{
+  const chip = e.target.closest('.chip'); if(!chip) return;
+  state.semana = Number(chip.dataset.semana);
+  resetWorkout();
+});
+el('localToggle').addEventListener('click', e=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  state.local = btn.dataset.local;
+  renderStaticUI();
+});
+el('startBtn').addEventListener('click', startWorkout);
+el('resetBtn').addEventListener('click', resetWorkout);
+el('skipBtn').addEventListener('click', skipCurrent);
+
+renderStaticUI();
+</script>
+
+</body>
+</html>
