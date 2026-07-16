@@ -451,9 +451,11 @@ function renderTimer(){
   if(state.phase === 'work'){
     ringFg.classList.add('working'); fig.classList.add('working'); label.classList.add('working');
     label.textContent = 'FORJANDO';
+    el('figImg').play().catch(()=>{});
   } else if(state.phase === 'rest'){
     ringFg.classList.add('resting'); fig.classList.add('resting'); label.classList.add('resting');
     label.textContent = 'DESCANSO';
+    el('figImg').pause();
   }
 }
 
@@ -507,7 +509,7 @@ function finishWorkout(){
 function resetWorkout(){
   clearInterval(state.tickHandle);
   state.running = false;
-  resetToIdleDisplay();
+  renderStaticUI();
 }
 
 function skipCurrent(){
