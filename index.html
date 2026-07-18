@@ -65,10 +65,10 @@
 
   /* FIGURE STAGE */
   .stage{
-    background:radial-gradient(ellipse at center, #FFFFFF 0%, var(--bg) 75%);
+    background: var(--card-2);
     border:1px solid var(--line);
     border-radius:16px;
-    padding:26px 20px 20px;
+    padding:22px 20px 20px;
     text-align:center;
     position:relative;
     overflow:hidden;
@@ -81,18 +81,19 @@
   .phase-label.working{ color:var(--ember); }
   .phase-label.resting{ color:#5b8ba6; }
 
-  .timer-ring-wrap{ position:relative; width:200px; height:200px; margin:14px auto 10px; }
+  .timer-ring-wrap{ position:relative; width:250px; height:280px; margin:14px auto 10px; }
+  .ring-badge{ position:absolute; top:-4px; right:-4px; width:64px; height:64px; z-index:2; }
   svg.ring{ transform:rotate(-90deg); width:100%; height:100%; }
-  .ring-bg{ fill:none; stroke:var(--line); stroke-width:6; }
-  .ring-fg{ fill:none; stroke:var(--cold); stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset 1s linear, stroke .4s ease; }
+  .ring-bg{ fill:none; stroke:var(--line); stroke-width:7; }
+  .ring-fg{ fill:none; stroke:var(--cold); stroke-width:7; stroke-linecap:round; transition:stroke-dashoffset 1s linear, stroke .4s ease; }
   .ring-fg.working{ stroke:var(--ember); }
   .ring-fg.resting{ stroke:#5b8ba6; }
 
   .figure-slot{ position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
   .time-num{
-    position:absolute; bottom:8px; left:0; right:0; text-align:center;
-    font-family:'League Spartan',sans-serif; font-weight:900; font-size:15px; color:var(--white);
-    opacity:0.85;
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'League Spartan',sans-serif; font-weight:900; font-size:16px; color:var(--white);
   }
 
   .ex-name{ font-family:'League Spartan',sans-serif; font-weight:900; text-transform:uppercase; font-size:22px; letter-spacing:0.5px; margin-top:6px;}
@@ -214,16 +215,18 @@
     <div class="phase-label" id="phaseLabel">PRONTO</div>
 
     <div class="timer-ring-wrap">
-      <svg class="ring" viewBox="0 0 200 200">
-        <circle class="ring-bg" cx="100" cy="100" r="88"></circle>
-        <circle class="ring-fg" id="ringFg" cx="100" cy="100" r="88"></circle>
-      </svg>
       <div class="figure-slot">
         <div class="fig idle" id="fig" data-pose="squat">
           <video id="figImg" autoplay loop muted playsinline></video>
         </div>
       </div>
-      <div class="time-num" id="timeNum">40</div>
+      <div class="ring-badge">
+        <svg class="ring" viewBox="0 0 200 200">
+          <circle class="ring-bg" cx="100" cy="100" r="88"></circle>
+          <circle class="ring-fg" id="ringFg" cx="100" cy="100" r="88"></circle>
+        </svg>
+        <div class="time-num" id="timeNum">40</div>
+      </div>
     </div>
 
     <div class="ex-name" id="exName">Agachamento</div>
