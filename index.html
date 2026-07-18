@@ -65,7 +65,7 @@
 
   /* FIGURE STAGE */
   .stage{
-    background: var(--card-2);
+    background: #FFFFFF;
     border:1px solid var(--line);
     border-radius:16px;
     padding:22px 20px 20px;
@@ -160,25 +160,13 @@
     opacity: 0.7;
     filter: saturate(0.35) hue-rotate(150deg);
   }
-  .timer-ring-wrap::before{
-    content:'';
-    position:absolute; inset:-18px;
-    border-radius:50%;
-    background: radial-gradient(circle, var(--glow-color, transparent) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity .5s ease, background .5s ease;
-    z-index: 0;
-    pointer-events: none;
+  .fig img#restImg{
+    max-width:100%; max-height:100%; object-fit:contain;
+    border-radius: 10px;
+    display: none;
   }
-  .fig.working ~ .time-num,
-  .timer-ring-wrap:has(.fig.working)::before{
-    --glow-color: rgba(214,59,47,0.35);
-    opacity: 1;
-  }
-  .timer-ring-wrap:has(.fig.resting)::before{
-    --glow-color: rgba(91,139,166,0.25);
-    opacity: 1;
-  }
+  .fig.resting video{ display:none; }
+  .fig.resting img#restImg{ display:block; }
 </style>
 </head>
 <body>
@@ -218,6 +206,7 @@
       <div class="figure-slot">
         <div class="fig idle" id="fig" data-pose="squat">
           <video id="figImg" autoplay loop muted playsinline></video>
+          <img id="restImg" src="poses/descansar.jpg" alt="">
         </div>
       </div>
       <div class="ring-badge">
@@ -469,12 +458,17 @@ function renderTimer(){
     ringFg.classList.add('working'); fig.classList.add('working'); label.classList.add('working');
     label.textContent = 'FORJANDO';
     el('figImg').play().catch(()=>{});
+    const ex = currentExercicios()[state.exIndex];
+    el('exName').textContent = ex.nome;
+    el('exDetail').textContent = state.local==='casa'? ex.casa : ex.academia;
   } else if(state.phase === 'rest'){
     ringFg.classList.add('resting'); fig.classList.add('resting'); label.classList.add('resting');
     label.textContent = 'DESCANSO';
     const v = el('figImg');
     v.pause();
     v.currentTime = 0;
+    el('exName').textContent = 'DESCANSAR';
+    el('exDetail').textContent = '';
   }
 }
 
