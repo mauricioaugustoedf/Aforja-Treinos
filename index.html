@@ -3,23 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#050505">
-<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#FAF7F3">
+<meta name="color-scheme" content="light">
 <title>Treinos — A Forja</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@500;700;900&family=Open+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#050505;
-    --card:#0D0D0D;
-    --card-2:#131313;
-    --line:#242424;
-    --gold:#E39E63;
+    --bg:#FAF7F3;
+    --card:#FFFFFF;
+    --card-2:#F3EEE7;
+    --line:#E4DCD1;
+    --gold:#C97F3E;
     --ember:#D63B2F;
-    --white:#FFFFFF;
-    --grey:#8a8a8a;
-    --cold:#3a4a5a;
+    --white:#1C1712;
+    --grey:#7a7168;
+    --cold:#5b8ba6;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html,body{height:100%; background:var(--bg);}
@@ -65,7 +65,7 @@
 
   /* FIGURE STAGE */
   .stage{
-    background:radial-gradient(ellipse at center, #14100c 0%, var(--bg) 75%);
+    background:radial-gradient(ellipse at center, #FFFFFF 0%, var(--bg) 75%);
     border:1px solid var(--line);
     border-radius:16px;
     padding:26px 20px 20px;
@@ -142,18 +142,22 @@
   }
   .fig video{
     max-width:100%; max-height:100%; object-fit:contain;
-    filter: brightness(0.72) saturate(0.5);
+    filter: saturate(0.7);
+    opacity: 1;
     border-radius: 10px;
-    transition: filter .5s ease;
+    transition: filter .5s ease, opacity .5s ease;
   }
   .fig.idle video{
-    filter: brightness(0.6) saturate(0.35);
+    opacity: 0.85;
+    filter: saturate(0.45);
   }
   .fig.working video{
-    filter: brightness(1.1) saturate(1.3) contrast(1.05);
+    opacity: 1;
+    filter: saturate(1.15) contrast(1.05);
   }
   .fig.resting video{
-    filter: brightness(0.5) saturate(0.2) hue-rotate(70deg);
+    opacity: 0.7;
+    filter: saturate(0.35) hue-rotate(150deg);
   }
   .timer-ring-wrap::before{
     content:'';
