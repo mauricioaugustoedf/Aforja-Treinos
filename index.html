@@ -143,22 +143,18 @@
   }
   .fig video{
     max-width:100%; max-height:100%; object-fit:contain;
-    filter: saturate(0.7);
     opacity: 1;
     border-radius: 10px;
-    transition: filter .5s ease, opacity .5s ease;
+    transition: opacity .5s ease;
   }
   .fig.idle video{
-    opacity: 0.85;
-    filter: saturate(0.45);
+    opacity: 0.9;
   }
   .fig.working video{
     opacity: 1;
-    filter: saturate(1.15) contrast(1.05);
   }
   .fig.resting video{
     opacity: 0.7;
-    filter: saturate(0.35) hue-rotate(150deg);
   }
   .fig img#restImg{
     max-width:100%; max-height:100%; object-fit:contain;
