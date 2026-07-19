@@ -676,6 +676,7 @@ function setMode(mode){
   el('stage').style.display = isForca ? 'none' : 'block';
   el('controls').style.display = isForca ? 'none' : 'flex';
   el('exlist').style.display = isForca ? 'none' : 'block';
+  el('weekMeta').style.display = isForca ? 'none' : 'flex';
   el('forcaView').classList.toggle('show', isForca);
   el('doneScreen').classList.remove('show');
   updateSemanaLabels();
