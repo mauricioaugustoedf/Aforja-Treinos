@@ -354,10 +354,10 @@
   </div>
 
   <div class="row-select" id="semanaSelect">
-    <div class="chip active" data-semana="1">S1</div>
-    <div class="chip" data-semana="2">S2</div>
-    <div class="chip" data-semana="3">S3</div>
-    <div class="chip" data-semana="4">S4</div>
+    <div class="chip active" data-semana="1"><span class="sem-label">S1</span></div>
+    <div class="chip" data-semana="2"><span class="sem-label">S2</span></div>
+    <div class="chip" data-semana="3"><span class="sem-label">S3</span></div>
+    <div class="chip" data-semana="4"><span class="sem-label">S4</span></div>
   </div>
 
   <div class="toggle-local" id="localToggle">
@@ -488,7 +488,7 @@ const POSES = {
 // ==== ACADEMIA · FORÇA MODE ====
 const TREINOS_FORCA = {
   A: {
-    titulo: "Treino A: Empurrar + Quadríceps (Alta Demanda)",
+    titulo: "Treino: Empurrar + Quadríceps (Alta Demanda)",
     foco: "Aumentar a frequência cardíaca através de movimentos globais.",
     exercicios: [
       {nome:"Agachamento Livre ou Goblet Squat", series:4, reps:"10-12"},
@@ -500,7 +500,7 @@ const TREINOS_FORCA = {
     ]
   },
   B: {
-    titulo: "Treino B: Puxar + Posterior (Alta Demanda)",
+    titulo: "Treino: Puxar + Posterior (Alta Demanda)",
     foco: "Cadeia posterior, essencial para postura e queima calórica.",
     exercicios: [
       {nome:"Levantamento Terra ou Stiff", series:4, reps:"10-12"},
@@ -678,7 +678,17 @@ function setMode(mode){
   el('exlist').style.display = isForca ? 'none' : 'block';
   el('forcaView').classList.toggle('show', isForca);
   el('doneScreen').classList.remove('show');
+  updateSemanaLabels();
   if(isForca) renderForcaView();
+}
+
+const SEMANA_LABELS_FORCA = {1:'A',2:'B',3:'C',4:'D'};
+function updateSemanaLabels(){
+  const isForca = state.mode === 'forca';
+  document.querySelectorAll('#semanaSelect .chip').forEach(c=>{
+    const n = c.dataset.semana;
+    c.querySelector('.sem-label').textContent = isForca ? SEMANA_LABELS_FORCA[n] : ('S'+n);
+  });
 }
 
 function renderStaticUI(){
@@ -926,6 +936,7 @@ el('skipBtn').addEventListener('click', skipCurrent);
 
 renderProgressUI();
 initOnboarding();
+updateSemanaLabels();
 renderStaticUI();
 </script>
 
