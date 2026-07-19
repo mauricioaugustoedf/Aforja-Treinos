@@ -183,6 +183,29 @@
   .btn-danger{ background:transparent; border:1px solid rgba(255,255,255,0.14); color:#A79A8C; flex:0 0 46px; font-size:15px;}
   .ctrl-icon{ width:19px; height:19px; }
 
+  /* FORÇA (ACADEMIA) MODE */
+  .forca-view{ display:none; }
+  .forca-view.show{ display:block; }
+  .forca-card{
+    background:#FFFFFF; border:1px solid var(--line); border-radius:var(--r-xl);
+    padding:22px 20px; text-align:left; margin-bottom:16px; box-shadow:var(--sh-2), var(--sh-3);
+  }
+  .forca-titulo{ font-family:'League Spartan',sans-serif; font-weight:900; text-transform:uppercase; font-size:19px; }
+  .forca-foco{ font-family:'Open Sans',sans-serif; font-style:italic; color:var(--grey); font-size:12.5px; margin-top:4px; margin-bottom:6px; }
+  .forca-meta{ font-family:'League Spartan',sans-serif; font-weight:700; font-size:11px; letter-spacing:0.5px; color:var(--cold); text-transform:uppercase; margin-bottom:14px; }
+  .forca-ex{ padding:12px 0; border-top:1px solid var(--line); }
+  .forca-ex:first-of-type{ border-top:none; }
+  .forca-ex-head{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+  .forca-ex-nome{ font-family:'League Spartan',sans-serif; font-weight:700; font-size:14.5px; }
+  .forca-ex-sr{ font-family:'Open Sans',sans-serif; font-size:12px; color:var(--gold); font-weight:600; white-space:nowrap; }
+  .forca-dots{ display:flex; gap:8px; margin-top:8px; }
+  .forca-dot{
+    width:28px; height:28px; border-radius:50%; border:1.5px solid var(--line); background:var(--card-2);
+    cursor:pointer; transition:all .2s var(--ease); display:flex; align-items:center; justify-content:center;
+  }
+  .forca-dot.done{ background:linear-gradient(180deg,var(--gold),#b9773f); border-color:var(--gold); box-shadow:var(--sh-gold); }
+  .forca-dot:active{ transform:scale(0.9); }
+
   .exlist{ margin-top:28px; }
   .exlist-title{ font-family:'League Spartan',sans-serif; font-weight:700; letter-spacing:1px; font-size:12px; text-transform:uppercase; color:var(--grey); margin-bottom:10px; }
   .exlist-item{
@@ -351,7 +374,7 @@
 
   <div class="week-meta" id="weekMeta"></div>
 
-  <div class="stage">
+  <div class="stage" id="stage">
     <div class="phase-label" id="phaseLabel">PRONTO</div>
 
     <div class="timer-ring-wrap">
@@ -378,7 +401,7 @@
     <div class="ex-progress" id="exProgress"></div>
   </div>
 
-  <div class="controls">
+  <div class="controls" id="controls">
     <button class="btn btn-danger" id="resetBtn" title="Reiniciar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ctrl-icon"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
     </button>
@@ -391,6 +414,18 @@
   <div class="exlist" id="exlist">
     <div class="exlist-title">Sequência do treino</div>
     <div id="exlistItems"></div>
+  </div>
+
+  <div class="forca-view" id="forcaView">
+    <div class="forca-card">
+      <div class="forca-titulo" id="forcaTitulo">Treino A</div>
+      <div class="forca-foco" id="forcaFoco">Foco</div>
+      <div class="forca-meta">~40 min · 45–60s de descanso entre séries</div>
+      <div id="forcaExList"></div>
+    </div>
+    <div class="controls">
+      <button class="btn btn-primary" id="forcaFinishBtn" style="flex:1">Concluir Treino</button>
+    </div>
   </div>
 
   <div class="done-screen" id="doneScreen">
@@ -451,7 +486,39 @@ const POSES = {
   "burpee": "poses/burpee.mp4"
 };
 
+// ==== ACADEMIA · FORÇA MODE ====
+const TREINOS_FORCA = {
+  A: {
+    titulo: "Treino A: Empurrar + Quadríceps (Alta Demanda)",
+    foco: "Aumentar a frequência cardíaca através de movimentos globais.",
+    exercicios: [
+      {nome:"Agachamento Livre ou Goblet Squat", series:4, reps:"10-12"},
+      {nome:"Supino Reto (Halteres)", series:4, reps:"10-12"},
+      {nome:"Leg Press 45°", series:3, reps:"12-15"},
+      {nome:"Desenvolvimento de Ombros (Halter)", series:3, reps:"10-12"},
+      {nome:"Extensora", series:3, reps:"15"},
+      {nome:"Tríceps Pulley", series:3, reps:"12-15"}
+    ]
+  },
+  B: {
+    titulo: "Treino B: Puxar + Posterior (Alta Demanda)",
+    foco: "Cadeia posterior, essencial para postura e queima calórica.",
+    exercicios: [
+      {nome:"Levantamento Terra ou Stiff", series:4, reps:"10-12"},
+      {nome:"Puxada Aberta (Pulley)", series:4, reps:"10-12"},
+      {nome:"Afundo ou Passada", series:3, reps:"12 (cada)"},
+      {nome:"Remada Baixa (Triângulo)", series:3, reps:"12-15"},
+      {nome:"Flexora (Mesa ou Sentada)", series:3, reps:"15"},
+      {nome:"Rosca Direta (Barra ou Halter)", series:3, reps:"12-15"}
+    ]
+  }
+};
+const SEMANA_TREINO_FORCA = { 1:'A', 2:'B', 3:'A', 4:'B' };
+let forcaChecks = {}; // { exIndex: setsCompletedCount }
+
+
 let state = {
+  mode: 'circuito',
   treino: 'A',
   semana: 1,
   local: 'casa',
@@ -557,6 +624,64 @@ function beep(freq, dur){
 function currentWeek(){ return SEMANAS[state.semana]; }
 function currentExercicios(){ return TREINOS[state.treino].exercicios; }
 
+function forcaTreinoLetra(){ return SEMANA_TREINO_FORCA[state.semana] || 'A'; }
+
+function renderForcaView(){
+  const letra = forcaTreinoLetra();
+  const t = TREINOS_FORCA[letra];
+  el('forcaTitulo').textContent = t.titulo;
+  el('forcaFoco').textContent = t.foco;
+  el('forcaExList').innerHTML = t.exercicios.map((ex,i)=>{
+    const done = forcaChecks[i] || 0;
+    let dots = '';
+    for(let s=0;s<ex.series;s++){
+      dots += `<div class="forca-dot ${s<done?'done':''}" data-exi="${i}" data-si="${s}"></div>`;
+    }
+    return `
+      <div class="forca-ex">
+        <div class="forca-ex-head">
+          <div class="forca-ex-nome">${ex.nome}</div>
+          <div class="forca-ex-sr">${ex.series}x ${ex.reps}</div>
+        </div>
+        <div class="forca-dots">${dots}</div>
+      </div>`;
+  }).join('');
+}
+
+function toggleForcaSet(exi, si){
+  const cur = forcaChecks[exi] || 0;
+  forcaChecks[exi] = (si < cur) ? si : si + 1;
+  renderForcaView();
+}
+
+function forcaAllDone(){
+  const letra = forcaTreinoLetra();
+  const t = TREINOS_FORCA[letra];
+  return t.exercicios.every((ex,i) => (forcaChecks[i]||0) >= ex.series);
+}
+
+function finishForcaWorkout(){
+  const letra = forcaTreinoLetra();
+  progress.sessions.push({ treino: 'F'+letra, semana: state.semana, local: 'academia', date: todayStr() });
+  saveProgress(progress);
+  renderProgressUI();
+  forcaChecks = {};
+  renderForcaView();
+  el('doneScreen').classList.add('show');
+}
+
+function setMode(mode){
+  state.mode = mode;
+  const isForca = mode === 'forca';
+  el('treinoSelect').style.display = isForca ? 'none' : 'flex';
+  el('stage').style.display = isForca ? 'none' : 'block';
+  el('controls').style.display = isForca ? 'none' : 'flex';
+  el('exlist').style.display = isForca ? 'none' : 'block';
+  el('forcaView').classList.toggle('show', isForca);
+  el('doneScreen').classList.remove('show');
+  if(isForca) renderForcaView();
+}
+
 function renderStaticUI(){
   document.querySelectorAll('#treinoSelect .chip').forEach(c=>{
     c.classList.toggle('active', c.dataset.treino === state.treino);
@@ -574,6 +699,7 @@ function renderStaticUI(){
   renderExList();
   renderRoundDots();
   resetToIdleDisplay();
+  if(state.mode === 'forca') renderForcaView();
 }
 
 function renderExList(){
@@ -781,9 +907,20 @@ el('semanaSelect').addEventListener('click', e=>{
 });
 el('localToggle').addEventListener('click', e=>{
   const btn = e.target.closest('button'); if(!btn) return;
+  document.querySelectorAll('#localToggle button').forEach(b=>b.classList.toggle('active', b===btn));
   state.local = btn.dataset.local;
-  renderStaticUI();
+  if(btn.dataset.local === 'academia'){
+    setMode('forca');
+  } else {
+    setMode('circuito');
+    renderStaticUI();
+  }
 });
+el('forcaExList').addEventListener('click', e=>{
+  const dot = e.target.closest('.forca-dot'); if(!dot) return;
+  toggleForcaSet(Number(dot.dataset.exi), Number(dot.dataset.si));
+});
+el('forcaFinishBtn').addEventListener('click', finishForcaWorkout);
 el('startBtn').addEventListener('click', startWorkout);
 el('resetBtn').addEventListener('click', resetWorkout);
 el('skipBtn').addEventListener('click', skipCurrent);
