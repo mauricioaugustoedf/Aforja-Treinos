@@ -310,9 +310,52 @@
   .modal-card .m-step{ display:flex; gap:10px; align-items:flex-start; font-family:'Open Sans',sans-serif; font-size:12.5px; color:var(--white); }
   .modal-card .m-step b{ font-family:'League Spartan',sans-serif; color:var(--gold); flex:0 0 auto; }
   .modal-card .btn-primary{ margin-top:18px; width:100%; padding:14px; }
+
+  /* Lock screen */
+  #lockVeil{
+    position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center;
+    background:var(--bg); padding:20px;
+  }
+  #lockVeil .lock-card{
+    background:var(--card); border-radius:var(--r-xl); padding:32px 26px; max-width:340px; width:100%;
+    box-shadow:var(--sh-float); text-align:center;
+  }
+  #lockVeil .m-tag{ font-family:'League Spartan',sans-serif; font-weight:900; letter-spacing:3px; font-size:11px; text-transform:uppercase; color:var(--gold); }
+  #lockVeil h2{ font-family:'League Spartan',sans-serif; font-weight:900; text-transform:uppercase; font-size:20px; margin-top:8px; color:var(--white); }
+  #lockVeil p{ font-family:'Open Sans',sans-serif; font-size:13px; color:var(--grey); line-height:1.5; margin-top:10px; }
+  #lockVeil input{
+    margin-top:20px; width:100%; padding:13px 14px; border-radius:var(--r-md); border:1px solid #E4DDD3;
+    font-family:'Open Sans',sans-serif; font-size:15px; text-align:center; box-sizing:border-box; outline:none;
+  }
+  #lockVeil input:focus{ border-color:var(--gold); }
+  #lockVeil .btn-primary{ margin-top:14px; width:100%; padding:14px; }
+  #lockVeil .lock-error{ margin-top:10px; font-family:'Open Sans',sans-serif; font-size:12.5px; color:#D63B2F; min-height:16px; }
+  #appRoot{ display:none; }
 </style>
 </head>
 <body>
+
+<div id="lockVeil">
+  <div class="lock-card" id="lockStageInitial">
+    <div class="m-tag">A Forja · Acesso</div>
+    <h2 class="gold-engrave">Área Restrita</h2>
+    <p>Este app é exclusivo de quem adquiriu a Fase 1: Moldar. Digite a senha de acesso enviada na sua área de membros.</p>
+    <input type="password" id="lockInput" placeholder="Senha de acesso" autocomplete="off">
+    <div class="lock-error" id="lockError"></div>
+    <button class="btn btn-primary" id="lockBtn">Entrar</button>
+  </div>
+  <div class="lock-card" id="lockStageCreate" style="display:none">
+    <div class="m-tag">A Forja · Acesso</div>
+    <h2 class="gold-engrave">Crie sua senha</h2>
+    <p>Pronto, senha de acesso confirmada. Agora crie uma senha pessoal só sua — vai ser pedida a partir de agora neste dispositivo.</p>
+    <input type="password" id="newPwd1" placeholder="Nova senha" autocomplete="off">
+    <input type="password" id="newPwd2" placeholder="Confirme a nova senha" autocomplete="off" style="margin-top:10px">
+    <div class="lock-error" id="createError"></div>
+    <button class="btn btn-primary" id="createBtn">Salvar e entrar</button>
+  </div>
+</div>
+
+<div id="appRoot">
 
 <div class="modal-veil" id="onboardVeil">
   <div class="modal-card">
@@ -939,6 +982,125 @@ renderProgressUI();
 initOnboarding();
 updateSemanaLabels();
 renderStaticUI();
+</script>
+
+</div>
+
+<script>
+(function(){
+  var SENHA_INICIAL = "AFORJA2026"; // senha compartilhada que você entrega no Kiwify — troque quando quiser
+  var STORAGE_KEY = 'aforja_pwd_hash';
+  var SESSION_KEY = 'aforja_unlocked';
+
+  var lockVeil = document.getElementById('lockVeil');
+  var appRoot = document.getElementById('appRoot');
+  var stageInitial = document.getElementById('lockStageInitial');
+  var stageCreate = document.getElementById('lockStageCreate');
+
+  var lockInput = document.getElementById('lockInput');
+  var lockBtn = document.getElementById('lockBtn');
+  var lockErr = document.getElementById('lockError');
+
+  var newPwd1 = document.getElementById('newPwd1');
+  var newPwd2 = document.getElementById('newPwd2');
+  var createBtn = document.getElementById('createBtn');
+  var createErr = document.getElementById('createError');
+
+  // hash simples (não é criptografia forte, só evita senha em texto puro no localStorage)
+  function hash(str){
+    var h = 5381;
+    for(var i=0; i<str.length; i++){
+      h = ((h << 5) + h) + str.charCodeAt(i);
+      h = h & h;
+    }
+    return String(h);
+  }
+
+  function unlock(){
+    lockVeil.style.display = 'none';
+    appRoot.style.display = 'block';
+    try{ sessionStorage.setItem(SESSION_KEY, '1'); }catch(e){}
+  }
+
+  function hasCustomPassword(){
+    try{ return !!localStorage.getItem(STORAGE_KEY); }catch(e){ return false; }
+  }
+
+  function checkCustomPassword(val){
+    try{ return localStorage.getItem(STORAGE_KEY) === hash(val); }catch(e){ return false; }
+  }
+
+  function saveCustomPassword(val){
+    try{ localStorage.setItem(STORAGE_KEY, hash(val)); }catch(e){}
+  }
+
+  function showCreateStage(){
+    stageInitial.style.display = 'none';
+    stageCreate.style.display = 'block';
+    newPwd1.focus();
+  }
+
+  function tryInitialOrCustom(){
+    var val = (lockInput.value || '').trim();
+    if(!val) return;
+
+    if(hasCustomPassword()){
+      // já existe senha pessoal neste dispositivo: só ela é aceita
+      if(checkCustomPassword(val)){
+        unlock();
+      } else {
+        lockErr.textContent = 'Senha incorreta.';
+        lockInput.value = '';
+        lockInput.focus();
+      }
+    } else {
+      // primeiro acesso neste dispositivo: só a senha inicial libera a etapa de criação
+      if(val.toUpperCase() === SENHA_INICIAL.toUpperCase()){
+        lockErr.textContent = '';
+        lockInput.value = '';
+        showCreateStage();
+      } else {
+        lockErr.textContent = 'Senha incorreta. Confira na sua área de membros.';
+        lockInput.value = '';
+        lockInput.focus();
+      }
+    }
+  }
+
+  function tryCreatePassword(){
+    var p1 = newPwd1.value || '';
+    var p2 = newPwd2.value || '';
+    if(p1.length < 4){
+      createErr.textContent = 'Use pelo menos 4 caracteres.';
+      return;
+    }
+    if(p1 !== p2){
+      createErr.textContent = 'As senhas não coincidem.';
+      newPwd2.value = '';
+      newPwd2.focus();
+      return;
+    }
+    saveCustomPassword(p1);
+    unlock();
+  }
+
+  // ao carregar: se já desbloqueou nesta aba/sessão, entra direto
+  try{
+    if(sessionStorage.getItem(SESSION_KEY) === '1'){
+      unlock();
+    }
+  }catch(e){}
+
+  lockBtn.addEventListener('click', tryInitialOrCustom);
+  lockInput.addEventListener('keydown', function(e){
+    if(e.key === 'Enter') tryInitialOrCustom();
+  });
+
+  createBtn.addEventListener('click', tryCreatePassword);
+  newPwd2.addEventListener('keydown', function(e){
+    if(e.key === 'Enter') tryCreatePassword();
+  });
+})();
 </script>
 
 </body>
